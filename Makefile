@@ -2,7 +2,7 @@
 BUNDLE_NAME = mcp-hunter
 VERSION ?= 0.1.0
 
-.PHONY: help install dev-install format format-check lint lint-fix typecheck test test-cov clean run run-http check all bump
+.PHONY: help install dev-install format format-check lint lint-fix typecheck test test-cov test-integration test-llm clean run run-http check all bump
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -36,6 +36,12 @@ test: ## Run tests with pytest
 
 test-cov: ## Run tests with coverage
 	uv run pytest tests/ -v --cov=src/mcp_hunter --cov-report=term-missing
+
+test-integration: ## Run integration tests (requires HUNTER_API_KEY)
+	uv run pytest tests-integration/ -v --ignore=tests-integration/test_skill_llm.py
+
+test-llm: ## Run LLM smoke tests (requires ANTHROPIC_API_KEY + HUNTER_API_KEY)
+	uv run pytest tests-integration/test_skill_llm.py -v
 
 clean: ## Clean up build artifacts and cache
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

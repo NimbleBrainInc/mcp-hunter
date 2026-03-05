@@ -28,7 +28,13 @@ logger = logging.getLogger("mcp_hunter")
 logger.info("Hunter.io server module loading...")
 
 # Create MCP server
-mcp = FastMCP("Hunter.io", instructions=SKILL_CONTENT)
+mcp = FastMCP(
+    "Hunter.io",
+    instructions=(
+        "Before using tools, read the skill://hunter/usage resource "
+        "for tool selection guidance and workflow patterns."
+    ),
+)
 
 # Global client instance (lazy initialization)
 _client: HunterClient | None = None
