@@ -1,0 +1,38 @@
+{
+  "manifest_version": "0.4",
+  "name": "@nimblebraininc/hunter",
+  "version": "0.1.0",
+  "description": "MCP server for Hunter.io — email discovery, verification, and enrichment",
+  "author": {
+    "name": "NimbleBrain Inc"
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Hunter.io API Key",
+      "description": "Your API key from https://hunter.io/api-keys",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "mcp_hunter.server",
+    "mcp_config": {
+      "command": "python",
+      "args": ["-m", "mcp_hunter.server"],
+      "env": {
+        "HUNTER_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "tools": [
+    {"name": "discover_companies", "description": "Find companies matching criteria via AI-powered search or filters (free)"},
+    {"name": "search_domain_emails", "description": "Find all email addresses for a company domain"},
+    {"name": "find_email", "description": "Find a specific person's email by name+domain or LinkedIn"},
+    {"name": "verify_email", "description": "Verify email deliverability with detailed checks"},
+    {"name": "enrich_person", "description": "Get full person profile from email or LinkedIn"},
+    {"name": "enrich_company", "description": "Get company details from domain"},
+    {"name": "check_account", "description": "Check account status and remaining credits (free)"}
+  ]
+}

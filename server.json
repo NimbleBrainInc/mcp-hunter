@@ -1,0 +1,7 @@
+{
+  "name": "@nimblebraininc/hunter",
+  "version": "0.1.0",
+  "description": "MCP server for Hunter.io — email discovery, verification, and enrichment",
+  "publisher": "nimblebraininc",
+  "repository": "https://github.com/NimbleBrainInc/mcp-hunter"
+}
