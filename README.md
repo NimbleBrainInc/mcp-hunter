@@ -1,6 +1,13 @@
 # Hunter.io MCP Server
 
-An MCP (Model Context Protocol) server that provides access to the Hunter.io API, enabling AI assistants to discover, verify, and enrich email addresses and company data.
+[![mpak](https://img.shields.io/badge/mpak-registry-blue)](https://mpak.dev/packages/@nimblebraininc/hunter?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)
+[![NimbleBrain](https://img.shields.io/badge/NimbleBrain-nimblebrain.ai-purple)](https://nimblebrain.ai?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)
+[![Discord](https://img.shields.io/badge/Discord-community-5865F2)](https://nimblebrain.ai/discord?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+An [MCP](https://modelcontextprotocol.io) server that provides access to the Hunter.io API, enabling AI assistants to discover, verify, and enrich email addresses and company data.
+
+**[View on mpak registry](https://mpak.dev/packages/@nimblebraininc/hunter?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)** | **Built by [NimbleBrain](https://nimblebrain.ai?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)**
 
 ## Features
 
@@ -17,12 +24,31 @@ An MCP (Model Context Protocol) server that provides access to the Hunter.io API
 ### Using mpak (Recommended)
 
 ```bash
-# Configure your API key
-mpak config set @nimblebraininc/hunter api_key=your_api_key_here
-
-# Run the server
-mpak run @nimblebraininc/hunter
+mpak install @nimblebraininc/hunter
 ```
+
+### Claude Code
+
+```bash
+claude mcp add hunter -- mpak run @nimblebraininc/hunter
+```
+
+### Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "hunter": {
+      "command": "mpak",
+      "args": ["run", "@nimblebraininc/hunter"]
+    }
+  }
+}
+```
+
+See the [mpak registry page](https://mpak.dev/packages/@nimblebraininc/hunter?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter) for full install options.
 
 ### Manual Installation
 
@@ -43,28 +69,13 @@ uv run python -m mcp_hunter.server
 
 ## Configuration
 
-### Getting Your API Key
+Get your API key at [hunter.io/api-keys](https://hunter.io/api-keys), then configure it:
 
-1. Go to https://hunter.io/api-keys
-2. Create a new API key
-3. Copy the key
-
-### Claude Desktop Configuration
-
-Add to your `~/.claude/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "hunter": {
-      "command": "mpak",
-      "args": ["run", "@nimblebraininc/hunter"]
-    }
-  }
-}
+```bash
+mpak config set @nimblebraininc/hunter api_key=your_api_key_here
 ```
 
-## Available Tools
+## Tools
 
 | Tool | Description | Cost |
 |------|-------------|------|
@@ -97,6 +108,15 @@ uv run ty check src/
 # Run all checks
 make check
 ```
+
+## About
+
+Hunter.io MCP Server is published on the [mpak registry](https://mpak.dev?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter) and built by [NimbleBrain](https://nimblebrain.ai?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter). mpak is an open registry for [Model Context Protocol](https://modelcontextprotocol.io) servers.
+
+- [mpak registry](https://mpak.dev?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)
+- [NimbleBrain](https://nimblebrain.ai?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)
+- [MCP specification](https://modelcontextprotocol.io)
+- [Discord community](https://nimblebrain.ai/discord?utm_source=github&utm_medium=readme&utm_campaign=mcp-hunter)
 
 ## License
 
