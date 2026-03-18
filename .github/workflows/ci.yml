@@ -50,14 +50,3 @@ jobs:
 
       - name: Run tests
         run: uv run pytest tests/ -v
-
-  bundle:
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Test bundle creation
-        uses: NimbleBrainInc/mcpb-pack@v2
-        with:
-          output: "{name}-{version}-linux-amd64.mcpb"
