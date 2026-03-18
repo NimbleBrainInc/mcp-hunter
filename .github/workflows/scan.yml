@@ -17,20 +17,14 @@ jobs:
         with:
           version: "latest"
 
-      - name: Set up Python
-        run: uv python install 3.13
-
-      - name: Install dependencies
-        run: uv sync
-
       - name: Build bundle
-        run: |
-          pip install mcpb
-          mcpb pack
+        uses: NimbleBrainInc/mcpb-pack@v2
+        with:
+          output: "{name}-{version}-linux-amd64.mcpb"
 
       - name: Run MTF scanner
         run: |
-          pip install mpak-scanner
+          uv pip install mpak-scanner
           mpak-scanner scan *.mcpb --json > scan-results.json
           cat scan-results.json
 
