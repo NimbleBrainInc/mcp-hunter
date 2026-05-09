@@ -33,10 +33,9 @@ jobs:
           jq --arg v "$VERSION" '.version = $v' manifest.json > manifest.tmp.json
           mv manifest.tmp.json manifest.json
           if [ -f server.json ]; then
-            jq --arg v "$VERSION" '.version = $v' server.json > server.tmp.json
             mv server.tmp.json server.json
           fi
 
-      - uses: NimbleBrainInc/mcpb-pack@v2
+      - uses: NimbleBrainInc/mcpb-pack@v3
         with:
           output: "{name}-{version}-${{ matrix.os }}-${{ matrix.arch }}.mcpb"
