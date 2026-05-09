@@ -1,6 +1,6 @@
 [project]
 name = "mcp-hunter"
-version = "0.1.1"
+version = "0.1.2"
 description = "MCP server for the Hunter.io API"
 readme = "README.md"
 license = {text = "MIT"}
