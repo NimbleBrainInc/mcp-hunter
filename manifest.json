@@ -1,7 +1,8 @@
 {
   "manifest_version": "0.4",
   "name": "@nimblebraininc/hunter",
-  "version": "0.1.2",
+  "display_name": "Hunter",
+  "version": "0.1.3",
   "description": "MCP server for Hunter.io — email discovery, verification, and enrichment",
   "author": {
     "name": "NimbleBrain Inc"
