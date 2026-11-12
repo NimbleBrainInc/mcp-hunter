@@ -40,7 +40,7 @@ mcp = FastMCP(
 _client: HunterClient | None = None
 
 
-def get_client(ctx: Context | None = None) -> HunterClient:
+async def get_client(ctx: Context | None = None) -> HunterClient:
     """Get or create the API client instance."""
     global _client
     if _client is None:
@@ -48,7 +48,7 @@ def get_client(ctx: Context | None = None) -> HunterClient:
         if not api_key:
             msg = "HUNTER_API_KEY environment variable is required"
             if ctx:
-                ctx.error(msg)
+                await ctx.error(msg)
             raise ValueError(msg)
         _client = HunterClient(api_key=api_key)
     return _client
@@ -96,7 +96,7 @@ async def discover_companies(
     Returns:
         Companies matching criteria with domain, name, and email counts
     """
-    client = get_client(ctx)
+    client = await get_client(ctx)
     try:
         kwargs: dict = {}
         if query:
@@ -118,7 +118,7 @@ async def discover_companies(
         return await client.discover(**kwargs)
     except HunterAPIError as e:
         if ctx:
-            ctx.error(f"API error: {e.message}")
+            await ctx.error(f"API error: {e.message}")
         raise
 
 
@@ -151,7 +151,7 @@ async def search_domain_emails(
     Returns:
         Email addresses with names, positions, departments, confidence scores, and sources
     """
-    client = get_client(ctx)
+    client = await get_client(ctx)
     try:
         return await client.domain_search(
             domain=domain,
@@ -164,7 +164,7 @@ async def search_domain_emails(
         )
     except HunterAPIError as e:
         if ctx:
-            ctx.error(f"API error: {e.message}")
+            await ctx.error(f"API error: {e.message}")
         raise
 
 
@@ -194,7 +194,7 @@ async def find_email(
     Returns:
         Email address with confidence score, position, and verification status
     """
-    client = get_client(ctx)
+    client = await get_client(ctx)
     try:
         return await client.find_email(
             domain=domain,
@@ -206,7 +206,7 @@ async def find_email(
         )
     except HunterAPIError as e:
         if ctx:
-            ctx.error(f"API error: {e.message}")
+            await ctx.error(f"API error: {e.message}")
         raise
 
 
@@ -227,12 +227,12 @@ async def verify_email(
     Returns:
         Verification status, deliverability score, and detailed checks
     """
-    client = get_client(ctx)
+    client = await get_client(ctx)
     try:
         return await client.verify_email(email)
     except HunterAPIError as e:
         if ctx:
-            ctx.error(f"API error: {e.message}")
+            await ctx.error(f"API error: {e.message}")
         raise
 
 
@@ -254,12 +254,12 @@ async def enrich_person(
     Returns:
         Person profile with name, location, employment, and social links
     """
-    client = get_client(ctx)
+    client = await get_client(ctx)
     try:
         return await client.enrich_person(email=email, linkedin_handle=linkedin_handle)
     except HunterAPIError as e:
         if ctx:
-            ctx.error(f"API error: {e.message}")
+            await ctx.error(f"API error: {e.message}")
         raise
 
 
@@ -279,12 +279,12 @@ async def enrich_company(
     Returns:
         Company profile with industry, description, location, and metadata
     """
-    client = get_client(ctx)
+    client = await get_client(ctx)
     try:
         return await client.enrich_company(domain)
     except HunterAPIError as e:
         if ctx:
-            ctx.error(f"API error: {e.message}")
+            await ctx.error(f"API error: {e.message}")
         raise
 
 
@@ -300,12 +300,12 @@ async def check_account(
     Returns:
         Account details including plan name, remaining searches and verifications
     """
-    client = get_client(ctx)
+    client = await get_client(ctx)
     try:
         return await client.account()
     except HunterAPIError as e:
         if ctx:
-            ctx.error(f"API error: {e.message}")
+            await ctx.error(f"API error: {e.message}")
         raise
 
 
