@@ -149,3 +149,21 @@ class TestMCPTools:
             async with Client(mcp_server) as client:
                 with pytest.raises(ToolError, match="401"):
                     await client.call_tool("discover_companies", {"query": "test"})
+
+    @pytest.mark.asyncio
+    async def test_api_error_surfaces_as_tool_error(self, mcp_server, mock_client):
+        """An API error reaches the caller as a tool error carrying its message."""
+        mock_client.account.side_effect = HunterAPIError(429, "Too many requests")
+        with patch("mcp_hunter.server.get_client", return_value=mock_client):
+            async with Client(mcp_server) as client:
+                with pytest.raises(ToolError, match="Too many requests"):
+                    await client.call_tool("check_account", {})
+
+    @pytest.mark.asyncio
+    async def test_missing_api_key_is_a_tool_error(self, mcp_server, monkeypatch):
+        """Without HUNTER_API_KEY the tool fails with a message naming the variable."""
+        monkeypatch.delenv("HUNTER_API_KEY", raising=False)
+        monkeypatch.setattr("mcp_hunter.server._client", None)
+        async with Client(mcp_server) as client:
+            with pytest.raises(ToolError, match="HUNTER_API_KEY"):
+                await client.call_tool("check_account", {})

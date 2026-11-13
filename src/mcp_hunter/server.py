@@ -9,7 +9,8 @@ import os
 import sys
 from importlib.resources import files
 
-from fastmcp import Context, FastMCP
+from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -17,7 +18,9 @@ from mcp_hunter.api_client import HunterAPIError, HunterClient
 
 SKILL_CONTENT = files("mcp_hunter").joinpath("SKILL.md").read_text()
 
-# Logging setup - all logs to stderr (stdout is reserved for JSON-RPC)
+# Logging setup - all logs to stderr (stdout is reserved for JSON-RPC). Diagnostics go
+# here, never to the client: MCP's logging capability is deprecated as of the 2026-07-28
+# protocol (SEP-2577). A failure the caller must see is raised as a ToolError.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -40,16 +43,14 @@ mcp = FastMCP(
 _client: HunterClient | None = None
 
 
-async def get_client(ctx: Context | None = None) -> HunterClient:
+async def get_client() -> HunterClient:
     """Get or create the API client instance."""
     global _client
     if _client is None:
         api_key = os.environ.get("HUNTER_API_KEY")
         if not api_key:
-            msg = "HUNTER_API_KEY environment variable is required"
-            if ctx:
-                await ctx.error(msg)
-            raise ValueError(msg)
+            logger.error("HUNTER_API_KEY is not set")
+            raise ToolError("HUNTER_API_KEY environment variable is required")
         _client = HunterClient(api_key=api_key)
     return _client
 
@@ -75,7 +76,6 @@ async def discover_companies(
     headcount: list[str] | None = None,
     limit: int = 20,
     offset: int = 0,
-    ctx: Context | None = None,
 ) -> dict:
     """Discover companies matching search criteria using AI-powered natural language or structured filters.
 
@@ -91,12 +91,11 @@ async def discover_companies(
         headcount: Company sizes to include (e.g. ["1-10", "11-50", "51-200"])
         limit: Max results to return (default 20, max 100)
         offset: Number of results to skip for pagination
-        ctx: MCP context for logging
 
     Returns:
         Companies matching criteria with domain, name, and email counts
     """
-    client = await get_client(ctx)
+    client = await get_client()
     try:
         kwargs: dict = {}
         if query:
@@ -117,9 +116,8 @@ async def discover_companies(
 
         return await client.discover(**kwargs)
     except HunterAPIError as e:
-        if ctx:
-            await ctx.error(f"API error: {e.message}")
-        raise
+        logger.warning("discover_companies failed: %s", e)
+        raise ToolError(str(e)) from e
 
 
 @mcp.tool()
@@ -131,7 +129,6 @@ async def search_domain_emails(
     email_type: str | None = None,
     limit: int = 10,
     offset: int = 0,
-    ctx: Context | None = None,
 ) -> dict:
     """Find all email addresses for a company domain. Costs 1 credit per 10 emails returned.
 
@@ -146,12 +143,11 @@ async def search_domain_emails(
         email_type: Filter by type: "personal" or "generic" (role-based)
         limit: Max emails to return (default 10, max 100)
         offset: Number of emails to skip for pagination
-        ctx: MCP context for logging
 
     Returns:
         Email addresses with names, positions, departments, confidence scores, and sources
     """
-    client = await get_client(ctx)
+    client = await get_client()
     try:
         return await client.domain_search(
             domain=domain,
@@ -163,9 +159,8 @@ async def search_domain_emails(
             department=department,
         )
     except HunterAPIError as e:
-        if ctx:
-            await ctx.error(f"API error: {e.message}")
-        raise
+        logger.warning("search_domain_emails failed: %s", e)
+        raise ToolError(str(e)) from e
 
 
 @mcp.tool()
@@ -176,7 +171,6 @@ async def find_email(
     domain: str | None = None,
     company: str | None = None,
     linkedin_handle: str | None = None,
-    ctx: Context | None = None,
 ) -> dict:
     """Find a specific person's professional email address. Costs 1 credit per successful lookup.
 
@@ -189,12 +183,11 @@ async def find_email(
         domain: Company domain (e.g. "stripe.com"). Preferred over company name.
         company: Company name (e.g. "Stripe")
         linkedin_handle: LinkedIn profile handle (alternative to name+domain)
-        ctx: MCP context for logging
 
     Returns:
         Email address with confidence score, position, and verification status
     """
-    client = await get_client(ctx)
+    client = await get_client()
     try:
         return await client.find_email(
             domain=domain,
@@ -205,15 +198,13 @@ async def find_email(
             linkedin_handle=linkedin_handle,
         )
     except HunterAPIError as e:
-        if ctx:
-            await ctx.error(f"API error: {e.message}")
-        raise
+        logger.warning("find_email failed: %s", e)
+        raise ToolError(str(e)) from e
 
 
 @mcp.tool()
 async def verify_email(
     email: str,
-    ctx: Context | None = None,
 ) -> dict:
     """Verify if an email address is deliverable. Costs 0.5 credits.
 
@@ -222,25 +213,22 @@ async def verify_email(
 
     Args:
         email: The email address to verify
-        ctx: MCP context for logging
 
     Returns:
         Verification status, deliverability score, and detailed checks
     """
-    client = await get_client(ctx)
+    client = await get_client()
     try:
         return await client.verify_email(email)
     except HunterAPIError as e:
-        if ctx:
-            await ctx.error(f"API error: {e.message}")
-        raise
+        logger.warning("verify_email failed: %s", e)
+        raise ToolError(str(e)) from e
 
 
 @mcp.tool()
 async def enrich_person(
     email: str | None = None,
     linkedin_handle: str | None = None,
-    ctx: Context | None = None,
 ) -> dict:
     """Get full profile for a person from their email or LinkedIn handle. Costs 0.2 credits.
 
@@ -249,24 +237,21 @@ async def enrich_person(
     Args:
         email: The person's email address
         linkedin_handle: LinkedIn profile handle (prioritized when both provided)
-        ctx: MCP context for logging
 
     Returns:
         Person profile with name, location, employment, and social links
     """
-    client = await get_client(ctx)
+    client = await get_client()
     try:
         return await client.enrich_person(email=email, linkedin_handle=linkedin_handle)
     except HunterAPIError as e:
-        if ctx:
-            await ctx.error(f"API error: {e.message}")
-        raise
+        logger.warning("enrich_person failed: %s", e)
+        raise ToolError(str(e)) from e
 
 
 @mcp.tool()
 async def enrich_company(
     domain: str,
-    ctx: Context | None = None,
 ) -> dict:
     """Get detailed company information from a domain name. Costs 0.2 credits.
 
@@ -274,39 +259,31 @@ async def enrich_company(
 
     Args:
         domain: Company domain name (e.g. "stripe.com")
-        ctx: MCP context for logging
 
     Returns:
         Company profile with industry, description, location, and metadata
     """
-    client = await get_client(ctx)
+    client = await get_client()
     try:
         return await client.enrich_company(domain)
     except HunterAPIError as e:
-        if ctx:
-            await ctx.error(f"API error: {e.message}")
-        raise
+        logger.warning("enrich_company failed: %s", e)
+        raise ToolError(str(e)) from e
 
 
 @mcp.tool()
-async def check_account(
-    ctx: Context | None = None,
-) -> dict:
+async def check_account() -> dict:
     """Check your Hunter.io account status, plan, and remaining credits. Free, no credits used.
-
-    Args:
-        ctx: MCP context for logging
 
     Returns:
         Account details including plan name, remaining searches and verifications
     """
-    client = await get_client(ctx)
+    client = await get_client()
     try:
         return await client.account()
     except HunterAPIError as e:
-        if ctx:
-            await ctx.error(f"API error: {e.message}")
-        raise
+        logger.warning("check_account failed: %s", e)
+        raise ToolError(str(e)) from e
 
 
 # ============================================================================
