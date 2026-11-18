@@ -307,4 +307,4 @@ app = mcp.http_app()
 # Stdio entrypoint for Claude Desktop / mpak
 if __name__ == "__main__":
     logger.info("Running in stdio mode")
-    mcp.run()
+    mcp.run(show_banner=False)
