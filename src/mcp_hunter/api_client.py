@@ -43,7 +43,7 @@ class HunterClient:
     async def _ensure_session(self) -> None:
         if not self._session:
             headers = {
-                "User-Agent": "mcp-server-hunter/0.2.1",
+                "User-Agent": "mcp-server-hunter/0.2.2",
                 "Accept": "application/json",
                 "Content-Type": "application/json",
                 "X-API-KEY": self.api_key or "",

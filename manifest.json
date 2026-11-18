@@ -2,8 +2,12 @@
   "manifest_version": "0.4",
   "name": "@nimblebraininc/hunter",
   "display_name": "Hunter",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NimbleBrainInc/mcp-hunter"
+  },
   "description": "MCP server for Hunter.io — email discovery, verification, and enrichment",
   "author": {
     "name": "NimbleBrain Inc"
@@ -61,5 +65,17 @@
       "name": "check_account",
       "description": "Check account status and remaining credits (free)"
     }
-  ]
+  ],
+  "_meta": {
+    "org.mpaktrust": {
+      "mtf_version": "0.1",
+      "permissions": {
+        "filesystem": "none",
+        "network": "outbound",
+        "environment": "read",
+        "subprocess": "none",
+        "native": "none"
+      }
+    }
+  }
 }
